@@ -1,0 +1,29 @@
+# Define la versión mínima de iOS para evitar problemas de compatibilidad
+platform :ios, '13.0'
+
+flutter_application_path = '../flutter_module'
+
+# Ejecutar el podhelper.rb de manera segura usando system
+load File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb') if File.exist?(File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb'))
+
+target 'QRApp' do
+  use_frameworks!
+  use_modular_headers!
+
+  # Instalación del módulo Flutter (ESTO YA AGREGA FLUTTER)
+  install_all_flutter_pods(flutter_application_path) if defined?(install_all_flutter_pods)
+
+  target 'QRAppTests' do
+    inherit! :search_paths
+    use_modular_headers!
+  end
+
+  target 'QRAppUITests' do
+    inherit! :search_paths
+    use_modular_headers!
+  end
+end
+
+post_install do |installer|
+  flutter_post_install(installer) if defined?(flutter_post_install)
+end
