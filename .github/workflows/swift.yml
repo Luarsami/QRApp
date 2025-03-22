@@ -16,6 +16,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set Xcode version
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app/Contents/Developer
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -31,15 +34,31 @@ jobs:
           cd flutter_module
           flutter build ios-framework --no-debug --output=./build/ios-framework
 
-      - name: Set up Xcode dependencies
+      - name: Prepare iOS dependencies
         run: |
           cd ios
           pod install --repo-update
 
+      - name: Ensure shared Xcode scheme
+        run: |
+          cd ios
+          mkdir -p QRApp.xcworkspace/xcshareddata/xcschemes
+          cp QRApp.xcodeproj/xcshareddata/xcschemes/QRApp.xcscheme QRApp.xcworkspace/xcshareddata/xcschemes/ || true
+
       - name: Build iOS app
         run: |
-          xcodebuild clean build -workspace ios/QRApp.xcworkspace -scheme QRApp -destination "platform=iOS Simulator,name=iPhone 14,OS=latest" CODE_SIGNING_ALLOWED=NO
+          xcodebuild clean build \
+          -workspace ios/QRApp.xcworkspace \
+          -scheme QRApp \
+          -destination "platform=iOS Simulator,name=iPhone 14,OS=latest" \
+          CODE_SIGNING_ALLOWED=NO \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_IDENTITY=""
 
       - name: Run iOS tests
         run: |
-          xcodebuild test -workspace ios/QRApp.xcworkspace -scheme QRApp -destination "platform=iOS Simulator,name=iPhone 14,OS=latest" CODE_SIGNING_ALLOWED=NO
+          xcodebuild test \
+          -workspace ios/QRApp.xcworkspace \
+          -scheme QRApp \
+          -destination "platform=iOS Simulator,name=iPhone 14,OS=latest" \
+          CODE_SIGNING_ALLOWED=NO
