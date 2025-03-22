@@ -80,3 +80,8 @@ Esto compilará y enviará la app a TestFlight.
 
 El archivo `Fastfile` se encuentra en `ios/fastlane/Fastfile` y contiene los scripts de automatización.
 
+### Arquitectura
+
+- **ios/**: Se construyo usando MVVM para manejar una arquitectura limpia, y se separaron las dependencias de services, app y navigation.
+
+- **flutter_module/**: Se contruyo con una arquitectura limpia basada en MVVM con separación de UI, ViewModels y Core.
