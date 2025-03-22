@@ -17,7 +17,7 @@ class QRScannerViewModel: NSObject, ObservableObject, AVCaptureMetadataOutputObj
     
     private let context: NSManagedObjectContext
     private let cameraPermissionService = CameraPermissionService()
-    private var captureSession: AVCaptureSession?
+    var captureSession: AVCaptureSession?
     private var cancellables = Set<AnyCancellable>()
     private var isProcessingScan = false
     
@@ -38,12 +38,20 @@ class QRScannerViewModel: NSObject, ObservableObject, AVCaptureMetadataOutputObj
     
     @objc private func resetScannerState() {
         print("🔄 Reset Scanner después del Logout")
+
         DispatchQueue.main.async {
             self.scannedCode = nil
-            self.isShowingScanner = false
             self.isProcessingScan = false
+
+            if self.isShowingScanner {
+                print("✅ Reset completo del escáner después del logout")
+                self.isShowingScanner = false
+            } else {
+                print("⚠ Escáner ya estaba cerrado, no hacer nada.")
+            }
         }
     }
+
     
     /// 📸 Inicia la sesión de captura
     func startScanning() {
@@ -63,8 +71,24 @@ class QRScannerViewModel: NSObject, ObservableObject, AVCaptureMetadataOutputObj
     
     /// 🛑 Detiene la sesión de captura
     func stopScanning() {
-        captureSession?.stopRunning()
+        print("⏹ Deteniendo escaneo...")
+
+        if let session = captureSession, session.isRunning {
+            session.stopRunning()
+            print("✅ Sesión de captura detenida correctamente")
+        } else {
+            print("⚠ No hay sesión de captura activa")
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            if self.isShowingScanner {
+                print("⚠ Previniendo cierre inesperado de escáner")
+                return
+            }
+            self.isShowingScanner = false
+        }
     }
+
     
     /// 🔹 Configura la sesión de captura
     func setupCaptureSession() -> AVCaptureSession? {

@@ -10,14 +10,14 @@ import AVFoundation
 
 struct QRScannerView: UIViewControllerRepresentable {
     @ObservedObject var viewModel: QRScannerViewModel
-
+    
     func makeCoordinator() -> Coordinator {
         return Coordinator(viewModel: viewModel)
     }
-
+    
     func makeUIViewController(context: Context) -> UIViewController {
         let viewController = UIViewController()
-
+        
         // 🔹 Esperar a que la verificación de permisos termine antes de continuar
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             if !viewModel.cameraAccessGranted {
@@ -36,30 +36,30 @@ struct QRScannerView: UIViewControllerRepresentable {
                 }
             }
         }
-
+        
         if let session = viewModel.setupCaptureSession() {
             let previewLayer = AVCaptureVideoPreviewLayer(session: session)
             previewLayer.frame = viewController.view.layer.bounds
             previewLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
             viewController.view.layer.addSublayer(previewLayer)
-
+            
             DispatchQueue.global(qos: .userInitiated).async {
                 session.startRunning()
             }
         }
-
+        
         return viewController
     }
-
+    
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
-
+    
     class Coordinator: NSObject, AVCaptureMetadataOutputObjectsDelegate {
         var viewModel: QRScannerViewModel
-
+        
         init(viewModel: QRScannerViewModel) {
             self.viewModel = viewModel
         }
-
+        
         func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
             viewModel.metadataOutput(output, didOutput: metadataObjects, from: connection)
         }
@@ -75,8 +75,8 @@ import SwiftUI
 
 struct QRScannerWrapperView: View {
     @EnvironmentObject var viewModel: QRScannerViewModel
-    @Environment(\.dismiss) private var dismiss 
-
+    @Environment(\.dismiss) private var dismiss
+    
     var body: some View {
         QRScannerView(viewModel: viewModel)
             .onAppear {
@@ -86,13 +86,15 @@ struct QRScannerWrapperView: View {
                 }
             }
             .onReceive(viewModel.$isShowingScanner) { isShowing in
-                print("📌 isShowingScanner cambió a: \(isShowing)")
-                if !isShowing {
-                    DispatchQueue.main.async {
-                        print("✅ Cierre del escáner, manteniendo navegación")
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    if !isShowing && viewModel.captureSession?.isRunning == false {
+                        print("✅ Cierre confirmado del escáner, navegando atrás")
                         dismiss()
+                    } else {
+                        print("⚠ Previniendo cierre inesperado del escáner")
                     }
                 }
             }
+        
     }
 }
