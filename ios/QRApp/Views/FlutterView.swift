@@ -14,7 +14,7 @@ struct FlutterView: UIViewControllerRepresentable {
 
     func makeUIViewController(context: Context) -> FlutterViewController {
         let flutterEngine = FlutterManager.shared.flutterEngine
-        flutterEngine.viewController = nil  // ✅ Liberar el engine antes de asociarlo
+        flutterEngine.viewController = nil  
 
         let controller = FlutterViewController(engine: flutterEngine, nibName: nil, bundle: nil)
         let channel = FlutterMethodChannel(name: "seek.qrapp/channel", binaryMessenger: controller.binaryMessenger)

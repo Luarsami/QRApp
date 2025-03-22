@@ -55,7 +55,7 @@ class AuthenticationViewModel: ObservableObject {
     func logout() {
         print("📌 Cerrando sesión...")
         DispatchQueue.main.async {
-            self.isAuthenticated = false  // ✅ Bloquea la autenticación y vuelve al Login
+            self.isAuthenticated = false 
             self.requiresPin = false
             self.pin = ""
             self.isPinCorrect = true

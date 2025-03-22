@@ -6,7 +6,7 @@
 import SwiftUI
 
 class NavigationManager: ObservableObject {
-    @Published var path: [AppRoutes] = []  // ✅ Usar un array simple en lugar de NavigationPath
+    @Published var path: [AppRoutes] = []
 
     /// 🔹 Navegar a una nueva vista
     func push(_ view: AppRoutes) {

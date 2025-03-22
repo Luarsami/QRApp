@@ -74,8 +74,8 @@ struct QRScannerView: UIViewControllerRepresentable {
 import SwiftUI
 
 struct QRScannerWrapperView: View {
-    @EnvironmentObject var viewModel: QRScannerViewModel  // ✅ Se usa @EnvironmentObject
-    @Environment(\.dismiss) private var dismiss  // ✅ Acción para cerrar solo esta vista
+    @EnvironmentObject var viewModel: QRScannerViewModel
+    @Environment(\.dismiss) private var dismiss 
 
     var body: some View {
         QRScannerView(viewModel: viewModel)

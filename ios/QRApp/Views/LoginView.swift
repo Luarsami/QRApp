@@ -12,7 +12,7 @@ struct LoginView: View {
     @EnvironmentObject private var navigationManager: NavigationManager
 
     var body: some View {
-        NavigationStack {  // ✅ Ahora usa NavigationStack
+        NavigationStack {  
             VStack {
                 Text("Bienvenido")
                     .font(.largeTitle)

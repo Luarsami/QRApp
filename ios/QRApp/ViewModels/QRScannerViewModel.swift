@@ -19,7 +19,7 @@ class QRScannerViewModel: NSObject, ObservableObject, AVCaptureMetadataOutputObj
     private let cameraPermissionService = CameraPermissionService()
     private var captureSession: AVCaptureSession?
     private var cancellables = Set<AnyCancellable>()
-    private var isProcessingScan = false  // 🔹 Flag para evitar múltiples lecturas
+    private var isProcessingScan = false
     
     init(context: NSManagedObjectContext) {
         self.context = context
@@ -32,7 +32,7 @@ class QRScannerViewModel: NSObject, ObservableObject, AVCaptureMetadataOutputObj
         cameraPermissionService.checkPermission()
 
         print("📌 Iniciando QRScannerViewModel, isShowingScanner = true")
-        self.isShowingScanner = true  // ✅ Asegurar que está activo al inicializar
+        self.isShowingScanner = true  
         NotificationCenter.default.addObserver(self, selector: #selector(resetScannerState), name: .logoutNotification, object: nil)
     }
     
@@ -104,7 +104,7 @@ class QRScannerViewModel: NSObject, ObservableObject, AVCaptureMetadataOutputObj
     
     /// 🔄 Simula un escaneo cuando la cámara no está disponible
     func simulateScan() {
-        guard !isProcessingScan else { return }  // ✅ Evita múltiples ejecuciones
+        guard !isProcessingScan else { return }
         isProcessingScan = true
 
         print("🔹 Ejecutando simulateScan()...")
@@ -116,7 +116,7 @@ class QRScannerViewModel: NSObject, ObservableObject, AVCaptureMetadataOutputObj
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                 print("✅ Simulación completada, cerrando solo el escáner")
                 self.isShowingScanner = false
-                self.isProcessingScan = false  // ✅ Resetea para permitir nuevos escaneos
+                self.isProcessingScan = false
             }
         }
     }
@@ -142,8 +142,8 @@ class QRScannerViewModel: NSObject, ObservableObject, AVCaptureMetadataOutputObj
             return
         }
 
-        isProcessingScan = true  // 🔹 Evita múltiples escaneos seguidos
-        captureSession?.stopRunning()  // 🔹 Detiene el escáner inmediatamente
+        isProcessingScan = true
+        captureSession?.stopRunning()
 
         DispatchQueue.main.async {
             self.scannedCode = scannedText
@@ -152,7 +152,7 @@ class QRScannerViewModel: NSObject, ObservableObject, AVCaptureMetadataOutputObj
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                 self.isShowingScanner = false
-                self.isProcessingScan = false  // 🔹 Permite escanear en la próxima apertura
+                self.isProcessingScan = false
             }
         }
     }

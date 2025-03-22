@@ -18,13 +18,13 @@ struct QRApp: App {
 
     var body: some Scene {
         WindowGroup {
-            NavigationView {  // ✅ Se mantiene NavigationView para compatibilidad con iOS <16
+            NavigationView {
                 RootView()
                     .environmentObject(navigationManager)
                     .environmentObject(scannerViewModel)
                     .environmentObject(authViewModel)
             }
-            .navigationViewStyle(StackNavigationViewStyle())  // ✅ Estilo recomendado para evitar errores en iOS 16+
+            .navigationViewStyle(StackNavigationViewStyle())
         }
     }
 }
