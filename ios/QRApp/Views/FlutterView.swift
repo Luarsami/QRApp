@@ -9,18 +9,34 @@ import SwiftUI
 import Flutter
 
 struct FlutterView: UIViewControllerRepresentable {
+    @EnvironmentObject var scannerViewModel: QRScannerViewModel
+    @EnvironmentObject var authViewModel: AuthenticationViewModel
+
     func makeUIViewController(context: Context) -> FlutterViewController {
-        let controller = FlutterViewController(engine: FlutterManager.shared.flutterEngine, nibName: nil, bundle: nil)
+        let flutterEngine = FlutterManager.shared.flutterEngine
+        flutterEngine.viewController = nil  // ✅ Liberar el engine antes de asociarlo
+
+        let controller = FlutterViewController(engine: flutterEngine, nibName: nil, bundle: nil)
         let channel = FlutterMethodChannel(name: "seek.qrapp/channel", binaryMessenger: controller.binaryMessenger)
-        
+
         channel.setMethodCallHandler { (call, result) in
-            if call.method == "getScannedData" {
-                result("Ejemplo de QR desde iOS")
-            } else {
+            switch call.method {
+            case "getScannedData":
+                let qrCode = self.scannerViewModel.scannedCode ?? "No hay QR escaneado"
+                result(["message": "Ejemplo de QR desde iOS 🚀", "scannedData": qrCode])
+
+            case "logout":
+                DispatchQueue.main.async {
+                    print("📌 Flutter solicitó cierre de sesión")
+                    self.authViewModel.logout()
+                }
+                result("Logout exitoso desde iOS 🚪")
+
+            default:
                 result(FlutterMethodNotImplemented)
             }
         }
-        
+
         return controller
     }
 

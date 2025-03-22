@@ -5,28 +5,33 @@
 //  Created by Luis Sarria on 20/03/25.
 //
 
+//
+//  ContentView.swift
+//  QRApp
+//
+//  Created by Luis Sarria on 20/03/25.
+//
+
+//
+//  ContentView.swift
+//  QRApp
+//
+
 import SwiftUI
 
 struct ContentView: View {
-    @State private var isShowingScanner = false
-    @State private var scannedCode: String?
-    @State private var showFlutter = false  // Estado para mostrar FlutterView
+    @EnvironmentObject private var scannerViewModel: QRScannerViewModel
+    @EnvironmentObject private var navigationManager: NavigationManager
+    @EnvironmentObject private var authViewModel: AuthenticationViewModel
 
     var body: some View {
         VStack {
-            if let scannedCode = scannedCode {
-                Text("Código escaneado:")
-                    .font(.headline)
-                Text(scannedCode)
-                    .padding()
-                    .background(Color.gray.opacity(0.2))
-                    .cornerRadius(8)
-            } else {
-                Text("Escanea un código QR")
-            }
-            
-            // Botón para escanear QR
-            Button(action: { isShowingScanner = true }) {
+            Text(scannerViewModel.scannedCode ?? "No hay código escaneado")
+                .padding()
+                .background(Color.gray.opacity(0.2))
+                .cornerRadius(8)
+
+            NavigationLink(destination: QRScannerWrapperView().environmentObject(scannerViewModel)) {
                 Text("Escanear QR")
                     .padding()
                     .background(Color.blue)
@@ -35,8 +40,9 @@ struct ContentView: View {
             }
             .padding(.top, 20)
 
-            // Botón para abrir el módulo Flutter
-            Button(action: { showFlutter = true }) {
+            NavigationLink(destination: FlutterView()
+                .environmentObject(scannerViewModel)
+                .environmentObject(authViewModel)) {
                 Text("Abrir módulo Flutter")
                     .padding()
                     .background(Color.orange)
@@ -44,14 +50,20 @@ struct ContentView: View {
                     .cornerRadius(8)
             }
             .padding(.top, 10)
+
+            Button(action: {
+                authViewModel.logout()
+                scannerViewModel.scannedCode = nil
+                navigationManager.popToRoot()
+            }) {
+                Text("Cerrar sesión")
+                    .padding()
+                    .background(Color.red)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+            }
+            .padding(.top, 30)
         }
-        // Modal para la cámara (Escaneo de QR)
-        .sheet(isPresented: $isShowingScanner) {
-            QRScannerView(isShowingScanner: $isShowingScanner, scannedCode: $scannedCode)
-        }
-        // Modal para FlutterView
-        .fullScreenCover(isPresented: $showFlutter) {
-            FlutterView()
-        }
+        .navigationTitle("Inicio")
     }
 }

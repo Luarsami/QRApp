@@ -8,70 +8,64 @@
 import SwiftUI
 
 struct LoginView: View {
-    @StateObject private var authManager = AuthenticationManager()
-    @State private var pin = ""
-    @State private var isPinCorrect = true
-    @State private var storedPin: String? = nil
+    @EnvironmentObject private var authViewModel: AuthenticationViewModel
+    @EnvironmentObject private var navigationManager: NavigationManager
 
     var body: some View {
-        VStack {
-            Text("Bienvenido")
-                .font(.largeTitle)
-                .padding()
+        NavigationStack {  // ✅ Ahora usa NavigationStack
+            VStack {
+                Text("Bienvenido")
+                    .font(.largeTitle)
+                    .padding()
 
-            Button(action: { authManager.authenticate() }) {
-                HStack {
-                    Image(systemName: "faceid")
-                    Text("Iniciar sesión con Face ID / Touch ID")
-                }
-                .padding()
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(8)
-            }
-            .padding()
-
-            if authManager.requiresPin {
-                VStack {
-                    SecureField("Ingresa tu PIN", text: $pin)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding()
-
-                    if !isPinCorrect {
-                        Text("PIN incorrecto")
-                            .foregroundColor(.red)
-                    }
-
-                    Button("Validar PIN") {
-                        if storedPin == pin {
-                            authManager.isAuthenticated = true
-                        } else {
-                            isPinCorrect = false
-                        }
+                Button(action: { authViewModel.authenticate() }) {
+                    HStack {
+                        Text("Iniciar sesión con Face ID / Touch ID")
                     }
                     .padding()
-                    .background(Color.green)
+                    .background(Color.blue)
                     .foregroundColor(.white)
                     .cornerRadius(8)
                 }
-            }
-        }
-        .onAppear {
-            // Intentar recuperar el PIN almacenado
-            storedPin = KeychainHelper.getPIN()
+                .padding()
 
-            // Si no hay PIN guardado, establecer uno por defecto
-            if storedPin == nil {
-                let defaultPin = "1234"
-                KeychainHelper.savePIN(defaultPin)
-                storedPin = defaultPin
-                print("PIN predeterminado guardado: \(defaultPin)")
-            } else {
-                print("PIN encontrado en Keychain: \(storedPin!)")
+                if authViewModel.requiresPin {
+                    VStack {
+                        SecureField("Ingresa tu PIN", text: $authViewModel.pin)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .padding()
+
+                        if !authViewModel.isPinCorrect {
+                            Text("PIN incorrecto")
+                                .foregroundColor(.red)
+                        }
+
+                        Button("Validar PIN") {
+                            authViewModel.validatePIN()
+                        }
+                        .padding()
+                        .background(Color.green)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                    }
+                }
             }
-        }
-        .fullScreenCover(isPresented: $authManager.isAuthenticated) {
-            ContentView()
+            .onAppear {
+                if authViewModel.isAuthenticated {
+                    DispatchQueue.main.async {
+                        navigationManager.push(.home)
+                    }
+                }
+            }
+            .onChange(of: authViewModel.isAuthenticated) { _, newValue in
+                DispatchQueue.main.async {
+                    if newValue {
+                        navigationManager.push(.home)
+                    } else {
+                        navigationManager.popToRoot()
+                    }
+                }
+            }
         }
     }
 }
