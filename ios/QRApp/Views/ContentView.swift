@@ -41,6 +41,7 @@ struct ContentView: View {
             .padding(.top, 20)
 
             NavigationLink(destination: FlutterView()
+                .accessibilityHidden(true)
                 .environmentObject(scannerViewModel)
                 .environmentObject(authViewModel)) {
                 Text("Abrir módulo Flutter")

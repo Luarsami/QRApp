@@ -14,9 +14,20 @@ struct FlutterView: UIViewControllerRepresentable {
 
     func makeUIViewController(context: Context) -> FlutterViewController {
         let flutterEngine = FlutterManager.shared.flutterEngine
-        flutterEngine.viewController = nil  
+        flutterEngine.viewController = nil
 
         let controller = FlutterViewController(engine: flutterEngine, nibName: nil, bundle: nil)
+        
+        controller.view.isAccessibilityElement = false
+        controller.view.accessibilityElementsHidden = true
+        controller.view.shouldGroupAccessibilityChildren = true
+        controller.view.accessibilityViewIsModal = true
+        
+        controller.view.subviews.forEach { subview in
+            subview.isAccessibilityElement = false
+            subview.accessibilityElementsHidden = true
+        }
+
         let channel = FlutterMethodChannel(name: "seek.qrapp/channel", binaryMessenger: controller.binaryMessenger)
 
         channel.setMethodCallHandler { (call, result) in
