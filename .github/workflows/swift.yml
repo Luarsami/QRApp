@@ -1,0 +1,45 @@
+name: iOS Build & Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.x"  # Reemplaza con la versión que estés usando
+
+      - name: Install Flutter dependencies
+        run: |
+          cd flutter_module
+          flutter pub get
+
+      - name: Build Flutter module
+        run: |
+          cd flutter_module
+          flutter build ios-framework --no-debug --output=./build/ios-framework
+
+      - name: Set up Xcode dependencies
+        run: |
+          cd ios
+          pod install --repo-update
+
+      - name: Build iOS app
+        run: |
+          xcodebuild clean build -workspace ios/QRApp.xcworkspace -scheme QRApp -destination "platform=iOS Simulator,name=iPhone 14,OS=latest" CODE_SIGNING_ALLOWED=NO
+
+      - name: Run iOS tests
+        run: |
+          xcodebuild test -workspace ios/QRApp.xcworkspace -scheme QRApp -destination "platform=iOS Simulator,name=iPhone 14,OS=latest" CODE_SIGNING_ALLOWED=NO
